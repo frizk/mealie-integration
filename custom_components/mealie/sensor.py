@@ -6,12 +6,6 @@ import calendar
 import json
 import datetime
 
-from homeassistant.components.sensor import (
-    SensorDeviceClass,
-    SensorEntity,
-    SensorStateClass,
-)
-from homeassistant.const import UnitOfTemperature
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.typing import ConfigType, DiscoveryInfoType
@@ -20,6 +14,10 @@ from homeassistant.helpers.entity import Entity
 from . import MealieHub
 from .const import DOMAIN
 
+
+_LOGGER = logging.getLogger(__name__)
+
+
 async def async_setup_platform(
     hass: HomeAssistant,
     config: ConfigType,
@@ -27,9 +25,9 @@ async def async_setup_platform(
     discovery_info: DiscoveryInfoType | None = None
 ) -> None:
     """Set up the sensor platform."""
-    add_entities([MealieSensor()])
+    add_entities([])
 
-_LOGGER = logging.getLogger(__name__)
+
 async def async_setup_entry(hass: HomeAssistant, config_entry: ConfigEntry, async_add_entities):
     mealie: MealieHub = hass.data[DOMAIN][config_entry.unique_id]
     entities = [MealieSensor(mealie.host, mealie.port, mealie._api_key)]
@@ -55,6 +53,7 @@ class MealieSensor(Entity):
             dayname = calendar.day_name[day]
             self._unique_id = f"{host}_{port}_current_week_{dayname}_dinner"
             self._name = f"Current Week {dayname} Meal"
+
     @property
     def state(self):
         """Return the meal name."""
@@ -70,14 +69,13 @@ class MealieSensor(Entity):
         """Return the name."""
         return self._name
 
-
     @property
     def unique_id(self):
         return self._unique_id
 
     async def async_update(self) -> None:
-        """Fetch new state data for the sensor.
-
+        """
+        Fetch new state data for the sensor.
         This is the only method that should fetch new data for Home Assistant.
         """
         headers = {"Authorization": f"Bearer {self._api_key}"}

@@ -6,7 +6,7 @@
   ],
   "config_flow": true,
   "dependencies": [],
-  "documentation": "https://www.home-assistant.io/integrations/mealie",
+  "documentation": "https://github.com/frizk/mealie-integration",
   "homekit": {},
   "iot_class": "local_polling",
   "requirements": [],
