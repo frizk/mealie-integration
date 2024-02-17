@@ -1,0 +1,21 @@
+{
+    "config": {
+        "abort": {
+            "already_configured": "Mealie instance is already configured"
+        },
+        "error": {
+            "cannot_connect": "Kunne ikke koble til",
+            "invalid_auth": "Ugyldig authentication",
+            "unknown": "Uventet feil"
+        },
+        "step": {
+            "user": {
+                "data": {
+                    "host": "Tjener/IP",
+                    "port": "Port",
+                    "api_key": "API nøkkel"
+                }
+            }
+        }
+    }
+}

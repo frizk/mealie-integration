@@ -1,0 +1,15 @@
+{
+  "domain": "mealie",
+  "name": "Mealie Meal Planner",
+  "codeowners": [
+    "@frizk"
+  ],
+  "config_flow": true,
+  "dependencies": [],
+  "documentation": "https://www.home-assistant.io/integrations/mealie",
+  "homekit": {},
+  "iot_class": "local_polling",
+  "requirements": [],
+  "ssdp": [],
+  "zeroconf": []
+}
