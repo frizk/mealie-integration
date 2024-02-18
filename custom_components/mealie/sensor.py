@@ -11,7 +11,7 @@ from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.typing import ConfigType, DiscoveryInfoType
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.helpers.entity import Entity
-from . import MealieHub
+from homeassistant.const import CONF_HOST, CONF_PORT, CONF_API_KEY
 from .const import DOMAIN
 
 
@@ -29,10 +29,11 @@ async def async_setup_platform(
 
 
 async def async_setup_entry(hass: HomeAssistant, config_entry: ConfigEntry, async_add_entities):
-    mealie: MealieHub = hass.data[DOMAIN][config_entry.unique_id]
-    entities = [MealieSensor(mealie.host, mealie.port, mealie._api_key)]
+    """Set up sensors"""
+    mealie: dict = hass.data[DOMAIN][config_entry.unique_id]
+    entities = [MealieSensor(mealie[CONF_HOST], mealie[CONF_PORT], mealie[CONF_API_KEY])]
     for i in range (0, 7):
-        entities.append(MealieSensor(mealie.host, mealie.port, mealie._api_key, i))
+        entities.append(MealieSensor(mealie[CONF_HOST], mealie[CONF_PORT], mealie[CONF_API_KEY], i))
     async_add_entities(entities)
 
 
@@ -71,13 +72,16 @@ class MealieSensor(Entity):
 
     @property
     def unique_id(self):
+        """Return the sensor unique id"""
         return self._unique_id
 
     async def async_update(self) -> None:
         """
         Fetch new state data for the sensor.
+
         This is the only method that should fetch new data for Home Assistant.
         """
+
         headers = {"Authorization": f"Bearer {self._api_key}"}
         if self._day is None:
             url = f"http://{self.host}:{self.port}/api/groups/mealplans/today"

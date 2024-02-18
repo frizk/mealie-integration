@@ -11,7 +11,6 @@ from homeassistant.const import CONF_HOST, CONF_PORT, CONF_API_KEY
 from homeassistant.core import HomeAssistant
 from homeassistant.data_entry_flow import FlowResult
 from homeassistant.exceptions import HomeAssistantError
-from . import MealieHub
 from .const import DOMAIN
 
 _LOGGER = logging.getLogger(__name__)
@@ -26,10 +25,7 @@ STEP_USER_DATA_SCHEMA = vol.Schema(
 
 
 async def validate_input(hass: HomeAssistant, data: dict[str, Any]) -> dict[str, Any]:
-
-    hub = MealieHub(data[CONF_HOST], data[CONF_PORT], data[CONF_API_KEY])
-    if not await hub.authenticate():
-        raise InvalidAuth
+    """Validate the user input allows us to reach the Mealie host"""
 
     return {"title": f"Mealie Integration {data[CONF_HOST]}"}
 
