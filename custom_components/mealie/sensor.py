@@ -1,5 +1,8 @@
 """Platform for sensor integration."""
 from __future__ import annotations
+
+from typing import Any
+
 import aiohttp
 import logging
 import calendar
@@ -29,7 +32,7 @@ async def async_setup_platform(
 
 
 async def async_setup_entry(hass: HomeAssistant, config_entry: ConfigEntry, async_add_entities):
-    """Set up sensors"""
+    """Set up sensors."""
     mealie: dict = hass.data[DOMAIN][config_entry.unique_id]
     entities = [MealieSensor(mealie[CONF_HOST], mealie[CONF_PORT], mealie[CONF_API_KEY])]
     for i in range (0, 7):
@@ -41,11 +44,12 @@ class MealieSensor(Entity):
     """Representation of a Sensor."""
 
     def __init__(self, host: str, port: str, api_key: str, day: int | None = None) -> None:
+        """Initialize the Mealie sensor."""
         self.host = host
         self.port = port
         self._api_key = api_key
         self._state = None
-        self._attributes = {}
+        self._attributes: dict[str, Any | None] = {}
         self._day = day
         if day is None:
             self._unique_id = f"{host}_{port}_today_dinner"
@@ -56,7 +60,7 @@ class MealieSensor(Entity):
             self._name = f"Current Week {dayname} Meal"
 
     @property
-    def state(self):
+    def state(self) -> str:
         """Return the meal name."""
         return self._state
 
@@ -71,8 +75,8 @@ class MealieSensor(Entity):
         return self._name
 
     @property
-    def unique_id(self):
-        """Return the sensor unique id"""
+    def unique_id(self) -> str:
+        """Return the sensor unique id."""
         return self._unique_id
 
     async def async_update(self) -> None:
@@ -85,16 +89,15 @@ class MealieSensor(Entity):
         headers = {"Authorization": f"Bearer {self._api_key}"}
         if self._day is None:
             url = f"http://{self.host}:{self.port}/api/groups/mealplans/today"
-            async with aiohttp.ClientSession(headers=headers) as session:
-                async with session.get(url) as resp:
-                    data = await resp.read()
-                    if resp.ok:
-                        data_entries = json.loads(data.decode("UTF-8"))
-                        if len(data_entries) > 0:
-                            today_recipe = data_entries[0]["recipe"]
-                            self._map_recipe(today_recipe)
-                    else:
-                        _LOGGER.error("GET today meal returned: %s", resp)
+            async with aiohttp.ClientSession(headers=headers) as session, session.get(url) as resp:
+                data = await resp.read()
+                if resp.ok:
+                    data_entries = json.loads(data.decode("UTF-8"))
+                    if len(data_entries) > 0:
+                        today_recipe = data_entries[0]["recipe"]
+                        self._map_recipe(today_recipe)
+                else:
+                    _LOGGER.error("GET today meal returned: %s", resp)
         else:
             url = f"http://{self.host}:{self.port}/api/groups/mealplans"
             current_date = datetime.date.today()
@@ -103,18 +106,18 @@ class MealieSensor(Entity):
                 "start_date": query_date,
                 "end_date": query_date
             }
-            async with aiohttp.ClientSession(headers=headers) as session:
-                async with session.get(url, params=params) as resp:
-                    data = await resp.read()
-                    if resp.ok:
-                        data_entries = json.loads(data.decode("UTF-8"))
-                        if "items" in data_entries and len(data_entries["items"]) > 0:
-                            recipe = data_entries["items"][0]["recipe"]
-                            self._map_recipe(recipe)
-                    else:
-                        _LOGGER.error("GET today meal returned: %s", resp)
+            async with aiohttp.ClientSession(headers=headers) as session, session.get(url, params=params) as resp:
+                data = await resp.read()
+                if resp.ok:
+                    data_entries = json.loads(data.decode("UTF-8"))
+                    if "items" in data_entries and len(data_entries["items"]) > 0:
+                        recipe = data_entries["items"][0]["recipe"]
+                        self._map_recipe(recipe)
+                else:
+                    _LOGGER.error("GET today meal returned: %s", resp)
 
     def _map_recipe(self, recipe: dict):
+        """Map recipe to sensor attributes."""
         self._state = recipe["name"]
         self._attributes['description'] = recipe.get("description")
         self._attributes['originalURL'] = recipe.get("orgURL")

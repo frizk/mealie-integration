@@ -25,8 +25,7 @@ STEP_USER_DATA_SCHEMA = vol.Schema(
 
 
 async def validate_input(hass: HomeAssistant, data: dict[str, Any]) -> dict[str, Any]:
-    """Validate the user input allows us to reach the Mealie host"""
-
+    """Validate the user input allows us to reach the Mealie host."""
     return {"title": f"Mealie Integration {data[CONF_HOST]}"}
 
 
